@@ -6,7 +6,7 @@
 	</head>
 
 	<body>
-		<h2>Adicionar Espetaculo</h2>
+		<h2>Adicionar Espetáculo</h2>
 		
 		<form id="addForm" action="" method="post">
 			<label for="nome">Nome:</label>
