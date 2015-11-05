@@ -3,7 +3,13 @@ package br.com.caelum.agiletickets.models;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import java.util.List;
+
+import junit.framework.Assert;
+
 import org.junit.Test;
+import org.joda.time.LocalDate;
+import org.joda.time.LocalTime;
 
 public class EspetaculoTest {
 
@@ -73,6 +79,51 @@ public class EspetaculoTest {
 		assertFalse(ivete.Vagas(5, 3));
 	}
 
+	@Test
+	public void naoDeveCriarSessoesSeDataInicioMaiorQueDataFimDiario() {
+		
+		Espetaculo espetaculo = new Espetaculo();
+		LocalDate fim = new LocalDate(2015, 11, 4);
+		LocalDate inicio = fim.plusDays(1);
+		LocalTime horario = new LocalTime();
+		Periodicidade periodicidade = Periodicidade.DIARIA;
+		
+		List<Sessao> sessoes = espetaculo.criaSessoes(inicio, fim, horario, periodicidade);
+		//then
+		Assert.assertEquals(0, sessoes.size());
+		
+	}
+	
+	@Test
+	public void naoDeveCriarSessoesSeDataInicioMaiorQueDataFimSemanal() {
+		
+		Espetaculo espetaculo = new Espetaculo();
+		LocalDate fim = new LocalDate(2015, 11, 5);
+		LocalDate inicio = fim.plusWeeks(1); 
+		LocalTime horario = new LocalTime();
+		Periodicidade periodicidade = Periodicidade.SEMANAL;
+		
+		List<Sessao> sessoes = espetaculo.criaSessoes(inicio, fim, horario, periodicidade);
+		//then
+		Assert.assertEquals(0, sessoes.size());
+		
+	}
+	
+	@Test
+	public void deveCriarSessoesSeDataFinalMaiorQueDataFim() {
+		
+		Espetaculo espetaculo = new Espetaculo();
+		LocalDate inicio = new LocalDate(2015, 11, 5);
+		LocalDate fim = new LocalDate(2015, 11, 4);
+		LocalTime horario = new LocalTime();
+		Periodicidade periodicidade = Periodicidade.DIARIA;
+		
+		List<Sessao> sessoes = espetaculo.criaSessoes(inicio, fim, horario, periodicidade);
+		//then
+		Assert.assertEquals(0, sessoes.size());
+		
+	}
+	
 	private Sessao sessaoComIngressosSobrando(int quantidade) {
 		Sessao sessao = new Sessao();
 		sessao.setTotalIngressos(quantidade * 2);
