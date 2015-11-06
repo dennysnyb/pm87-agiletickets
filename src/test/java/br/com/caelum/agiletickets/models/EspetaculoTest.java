@@ -110,17 +110,17 @@ public class EspetaculoTest {
 	}
 	
 	@Test
-	public void deveCriarSessoesSeDataFinalMaiorQueDataFim() {
+	public void deveCriarSessoesSeDataFinalMaiorQueDataInicioDiario() {
 		
 		Espetaculo espetaculo = new Espetaculo();
-		LocalDate inicio = new LocalDate(2015, 11, 5);
-		LocalDate fim = new LocalDate(2015, 11, 4);
+		LocalDate inicio = new LocalDate(2015, 11, 4);
+		LocalDate fim = new LocalDate(2015, 11, 5);
 		LocalTime horario = new LocalTime();
 		Periodicidade periodicidade = Periodicidade.DIARIA;
 		
 		List<Sessao> sessoes = espetaculo.criaSessoes(inicio, fim, horario, periodicidade);
 		//then
-		Assert.assertEquals(0, sessoes.size());
+		Assert.assertEquals(3, sessoes.size());
 		
 	}
 	

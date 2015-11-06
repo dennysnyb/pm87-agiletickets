@@ -14,8 +14,11 @@ import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 
+import org.jboss.weld.exceptions.IllegalArgumentException;
+import org.joda.time.Days;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalTime;
+import org.joda.time.Weeks;
 
 @Entity
 public class Espetaculo {
@@ -33,8 +36,8 @@ public class Espetaculo {
 
 	@ManyToOne
 	private Estabelecimento estabelecimento;
-	
-	@OneToMany(mappedBy="espetaculo")
+
+	@OneToMany(mappedBy = "espetaculo")
 	private List<Sessao> sessoes = newArrayList();
 
 	public Long getId() {
@@ -76,68 +79,105 @@ public class Espetaculo {
 	public Estabelecimento getEstabelecimento() {
 		return estabelecimento;
 	}
-	
+
 	public List<Sessao> getSessoes() {
 		return sessoes;
 	}
-	
+
 	/**
-     * Esse metodo eh responsavel por criar sessoes para
-     * o respectivo espetaculo, dado o intervalo de inicio e fim,
-     * mais a periodicidade.
-     * 
-     * O algoritmo funciona da seguinte forma:
-     * - Caso a data de inicio seja 01/01/2010, a data de fim seja 03/01/2010,
-     * e a periodicidade seja DIARIA, o algoritmo cria 3 sessoes, uma 
-     * para cada dia: 01/01, 02/01 e 03/01.
-     * 
-     * - Caso a data de inicio seja 01/01/2010, a data fim seja 31/01/2010,
-     * e a periodicidade seja SEMANAL, o algoritmo cria 5 sessoes, uma
-     * a cada 7 dias: 01/01, 08/01, 15/01, 22/01 e 29/01.
-     * 
-     * Repare que a data da primeira sessao é sempre a data inicial.
-     */
-	public List<Sessao> criaSessoes(LocalDate inicio, LocalDate fim, LocalTime horario, Periodicidade periodicidade) {
+	 * Esse metodo eh responsavel por criar sessoes para o respectivo
+	 * espetaculo, dado o intervalo de inicio e fim, mais a periodicidade.
+	 * 
+	 * O algoritmo funciona da seguinte forma: - Caso a data de inicio seja
+	 * 01/01/2010, a data de fim seja 03/01/2010, e a periodicidade seja DIARIA,
+	 * o algoritmo cria 3 sessoes, uma para cada dia: 01/01, 02/01 e 03/01.
+	 * 
+	 * - Caso a data de inicio seja 01/01/2010, a data fim seja 31/01/2010, e a
+	 * periodicidade seja SEMANAL, o algoritmo cria 5 sessoes, uma a cada 7
+	 * dias: 01/01, 08/01, 15/01, 22/01 e 29/01.
+	 * 
+	 * Repare que a data da primeira sessao é sempre a data inicial.
+	 */
+	public List<Sessao> criaSessoes(LocalDate inicio, LocalDate fim,
+			LocalTime horario, Periodicidade periodicidade) {
 		// ALUNO: Não apague esse metodo. Esse sim será usado no futuro! ;)
-		
-		List<Sessao> sessoes = new ArrayList<Sessao>(); 
-		
-		if (inicio.isAfter(fim)) { 
-			return sessoes;
+
+		List<Sessao> sessoes = new ArrayList<Sessao>();
+
+		if (inicio.isAfter(fim)) {
+			// throw new
+			// IllegalArgumentException("Data de fim menor que data de início.");
+			sessoes.clear();
 		}
-		
-		
-		
+
+		if (periodicidade == Periodicidade.DIARIA) {
+			sessoes = criaSessoesDiarias(inicio, fim, horario);
+		} else if (periodicidade == Periodicidade.SEMANAL) {
+			sessoes = criaSessoesSemanais(inicio, fim, horario);
+		}
+
 		return sessoes;
 	}
-	
-	public boolean Vagas(int qtd, int min)
-   {
-       // ALUNO: Não apague esse metodo. Esse sim será usado no futuro! ;)
-       int totDisp = 0;
 
-       for (Sessao s : sessoes)
-       {
-           if (s.getIngressosDisponiveis() < min) return false;
-           totDisp += s.getIngressosDisponiveis();
-       }
+	public List<Sessao> criaSessoesDiarias(LocalDate inicio, LocalDate fim,
+			LocalTime horario) {
+		List<Sessao> sessoesDiarias = new ArrayList<Sessao>();
 
-       if (totDisp >= qtd) return true;
-       else return false;
-   }
+		int dias = Days.daysBetween(inicio, fim).getDays();
+		for (int i = 0; i <= dias; i++) {
+			Sessao nova = new Sessao();
+			nova.setEspetaculo(this);
+			nova.setInicio(inicio.plusDays(i).toDateTime(horario));
 
-   public boolean Vagas(int qtd)
-   {
-       // ALUNO: Não apague esse metodo. Esse sim será usado no futuro! ;)
-       int totDisp = 0;
+			sessoesDiarias.add(nova);
+		}
 
-       for (Sessao s : sessoes)
-       {
-           totDisp += s.getIngressosDisponiveis();
-       }
+		return sessoesDiarias;
+	}
 
-       if (totDisp >= qtd) return true;
-       else return false;
-   }
+	public List<Sessao> criaSessoesSemanais(LocalDate inicio, LocalDate fim,
+			LocalTime horario) {
+		List<Sessao> sessoesSemanais = new ArrayList<Sessao>();
+		int semanas = Weeks.weeksBetween(inicio, fim).getWeeks();
+		for (int i = 0; i <= semanas; i++) {
+			Sessao nova = new Sessao();
+			nova.setEspetaculo(this);
+			nova.setInicio(inicio.plusWeeks(i).toDateTime(horario));
+
+			sessoesSemanais.add(nova);
+		}
+
+		return sessoesSemanais;
+	}
+
+	public boolean Vagas(int qtd, int min) {
+		// ALUNO: Não apague esse metodo. Esse sim será usado no futuro! ;)
+		int totDisp = 0;
+
+		for (Sessao s : sessoes) {
+			if (s.getIngressosDisponiveis() < min)
+				return false;
+			totDisp += s.getIngressosDisponiveis();
+		}
+
+		if (totDisp >= qtd)
+			return true;
+		else
+			return false;
+	}
+
+	public boolean Vagas(int qtd) {
+		// ALUNO: Não apague esse metodo. Esse sim será usado no futuro! ;)
+		int totDisp = 0;
+
+		for (Sessao s : sessoes) {
+			totDisp += s.getIngressosDisponiveis();
+		}
+
+		if (totDisp >= qtd)
+			return true;
+		else
+			return false;
+	}
 
 }
