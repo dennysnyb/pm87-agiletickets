@@ -120,7 +120,7 @@ public class EspetaculoTest {
 		
 		List<Sessao> sessoes = espetaculo.criaSessoes(inicio, fim, horario, periodicidade);
 		//then
-		Assert.assertEquals(3, sessoes.size());
+		Assert.assertEquals(2, sessoes.size());
 		
 	}
 	
